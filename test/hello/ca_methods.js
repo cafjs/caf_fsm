@@ -10,7 +10,6 @@ exports.methods = {
         return [];
     },
     async __ca_createMachine__() {
-        const self = this;
         const config = {
             id: 'semaphore',
             initial: 'RED',
@@ -19,7 +18,7 @@ exports.methods = {
                     on: {
                         TICK: {
                             target: 'GREEN',
-                            actions: () => {self.state.transition = 'GREEN';}
+                            actions: () => {this.state.transition = 'GREEN';}
                         }
                     }
                 },
@@ -27,7 +26,7 @@ exports.methods = {
                     on: {
                         TICK: {
                             target: 'YELLOW',
-                            actions: () => {self.state.transition = 'YELLOW';}
+                            actions: () => {this.state.transition = 'YELLOW';}
                         }
                     }
                 },
@@ -35,7 +34,7 @@ exports.methods = {
                     on: {
                         TICK: {
                             target: 'RED',
-                            actions: () => {self.state.transition = 'RED';}
+                            actions: () => {this.state.transition = 'RED';}
                         }
                     }
                 }
@@ -47,7 +46,7 @@ exports.methods = {
 
         const stateListener = (state) => {
             console.log(state);
-            this.$.session.notify([`got ${state}`], APP_SESSION);
+            this.$.session.notify([`got ${state.value}`], APP_SESSION);
         };
 
         return [null, {config, options, stateListener}];

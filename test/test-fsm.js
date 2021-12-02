@@ -52,7 +52,7 @@ module.exports = {
 
     async fsmSend(test) {
         const from1 = FROM_1;
-        test.expect(8);
+        test.expect(7);
         try {
             let s1 = new cli.Session('ws://root-fsm.vcap.me:3000',
                                      from1, {
@@ -79,16 +79,21 @@ module.exports = {
                 return [];
             });
 
-            console.log(p);
+            let res = await s1.getFSMState().getPromise();
+            test.ok(res === 'RED');
+            try {
+                res = await s1.tickAbort().getPromise();
+            } catch (ex) {
+                // ignore
+            }
 
-            let res = await s1.getFSMState.getPromise();
+            // State changes ignored
+            res = await s1.getFSMState().getPromise();
             test.ok(res === 'RED');
 
-            res = await s1.tickAbort().getPromise();
-            test.ok(res.transition === 'RED');
-
-            res = await s1.getFSMState.getPromise();
-            test.ok(res === 'RED');
+            // reload machine OK
+            res = await s1.tick().getPromise();
+            test.ok(res.transition === 'GREEN');
 
             p = await new Promise((resolve, reject) => {
                 s1.onclose = function(err) {
