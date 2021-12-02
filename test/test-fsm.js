@@ -11,28 +11,12 @@ const cli = caf_core.caf_cli;
 
 const crypto = require('crypto');
 
-const APP_FULL_NAME = 'root-graphql';
+const APP_FULL_NAME = 'root-fsm';
 
 const CA_OWNER_1='me'+ crypto.randomBytes(8).toString('hex');
 const CA_LOCAL_NAME_1='ca1';
 const FROM_1 =  CA_OWNER_1 + '-' + CA_LOCAL_NAME_1;
 const FQN_1 = APP_FULL_NAME + '#' + FROM_1;
-
-const QUERY1 = `
-query {
-  all {
-     name
-  }
-}
-`;
-
-const QUERY2 = `
-query {
-  altAll {
-     tool
-  }
-}
-`;
 
 process.on('uncaughtException', function (err) {
                console.log("Uncaught Exception: " + err);
@@ -66,23 +50,26 @@ module.exports = {
         }
     },
 
-    async dirtyEval(test) {
-        var self = this;
-        var s1;
-        var from1 = FROM_1;
-        test.expect(5);
-        var lastId;
+    async fsmSend(test) {
+        const from1 = FROM_1;
+        test.expect(8);
         try {
-            s1 = new cli.Session('ws://root-graphql.vcap.me:3000',
-                                 from1, {
-                                     from : from1
-                                 });
+            let s1 = new cli.Session('ws://root-fsm.vcap.me:3000',
+                                     from1, {
+                                         from : from1
+                                     });
             let p = await new Promise((resolve, reject) => {
                 s1.onopen = async function() {
                     try {
-                        var res = await s1.evalQuery(QUERY1)
-                                .getPromise();
-                        test.ok(res.all.length === 2);
+                        let res = await s1.tick().getPromise();
+                        test.ok(res.transition === 'GREEN');
+
+                        res = await s1.tick().getPromise();
+                        test.ok(res.transition === 'YELLOW');
+
+                        res = await s1.tick().getPromise();
+                        test.ok(res.transition === 'RED');
+
                         resolve(res);
                     } catch (err) {
                         test.ok(false, 'Got exception ' + err);
@@ -92,18 +79,16 @@ module.exports = {
                 return [];
             });
 
-            // repeat
             console.log(p);
-            let res = await s1.evalQuery(QUERY1).getPromise();
-            test.ok(res === null);
 
-            res = await s1.setResolver().getPromise();
+            let res = await s1.getFSMState.getPromise();
+            test.ok(res === 'RED');
 
-            res = await s1.evalQuery(QUERY2).getPromise();
-            test.ok(res.altAll.length === 2);
-            console.log(res);
-            res = await s1.evalQuery(QUERY2).getPromise();
-            test.ok(res === null);
+            res = await s1.tickAbort().getPromise();
+            test.ok(res.transition === 'RED');
+
+            res = await s1.getFSMState.getPromise();
+            test.ok(res === 'RED');
 
             p = await new Promise((resolve, reject) => {
                 s1.onclose = function(err) {

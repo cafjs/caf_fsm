@@ -3,7 +3,7 @@
     "env" : {
         "appProtocol" : "http",
         "appPublisher" :"root",
-        "appLocalName" : "graphql",
+        "appLocalName" : "fsm",
         "appSuffix" : "vcap.me:3000"
     },
     "components": [
@@ -18,18 +18,6 @@
         {
             "name": "security",
             "module": null
-        },
-        {
-            "name": "cp2"
-        },
-        {
-            "name": "graphql",
-            "module": "../../index.js#plug",
-            "description": "GraphQL service.",
-            "env" : {
-                "schemaDir": "process.env.SCHEMA_DIR||null",
-                "schemaFileName" : "process.env.SCHEMA_FILE_NAME||ca.graphql"
-            }
         }
     ]
 }
