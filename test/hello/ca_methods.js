@@ -53,12 +53,12 @@ exports.methods = {
     },
 
     async tick() {
-        this.$.fsm.send(this, 'TICK');
+        await this.$.fsm.send(this, 'TICK');
         return this.getState();
     },
 
     async tickAbort() {
-        this.$.fsm.send(this, 'TICK');
+        await this.$.fsm.send(this, 'TICK');
         return [new Error('abort tick')];
     },
 
