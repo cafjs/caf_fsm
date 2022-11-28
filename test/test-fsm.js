@@ -54,7 +54,7 @@ module.exports = {
         const from1 = FROM_1;
         test.expect(7);
         try {
-            let s1 = new cli.Session('ws://root-fsm.vcap.me:3000',
+            let s1 = new cli.Session('ws://root-fsm.localtest.me:3000',
                                      from1, {
                                          from : from1
                                      });
